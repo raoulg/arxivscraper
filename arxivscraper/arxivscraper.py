@@ -4,23 +4,23 @@ categories and specific date range.
 
 Author: Mahdi Sadjadi (sadjadi.seyedmahdi[AT]gmail[DOT]com).
 """
+
 from __future__ import print_function
-import xml.etree.ElementTree as ET
+
 import datetime
-import time
 import sys
+import time
+import xml.etree.ElementTree as ET
 from typing import Dict, List
 
 PYTHON3 = sys.version_info[0] == 3
 if PYTHON3:
-    from urllib.parse import urlencode
-    from urllib.request import urlopen
     from urllib.error import HTTPError
+    from urllib.request import urlopen
 else:
-    from urllib import urlencode
     from urllib2 import HTTPError, urlopen
 
-from .constants import OAI, ARXIV, BASE
+from .constants import ARXIV, BASE, OAI
 
 
 class Record(object):
@@ -179,8 +179,7 @@ class Scraper(object):
         ds = []
         k = 1
         while True:
-
-            print("fetching up to ", 1000 * k, "records...")
+            print("attempt to get ", 1000 * k, "records...")
             try:
                 response = urlopen(url)
             except HTTPError as e:
@@ -189,8 +188,10 @@ class Scraper(object):
                     print("Got 503. Retrying after {0:d} seconds.".format(self.t))
                     time.sleep(self.t)
                     continue
-                else:
-                    raise
+            except Exception as e:
+                print(f"Got error {e}.")
+                return ds
+
             k += 1
             xml = response.read()
             root = ET.fromstring(xml)
